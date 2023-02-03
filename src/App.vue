@@ -3,18 +3,35 @@
     import inputTask from "./components/inputTask.vue"
     import TasksLists from "./components/tasksLists.vue";
     import allCompleted from "./components/allCompleted.vue"
-    import showRemainingTasks from "./components/showRemainingTasks.vue";
-    import showFinishedTasks from "./components/showFinishedTasks.vue"
-    import showAllTasks from "./components/showAllTasks.vue"
+    import ButtonComponent from "./components/ButtonComponent.vue";
+    import ClearCompletedButton from "./components/ClearCompletedButton.vue"
 
     let id=0;
     const tasks=ref([]);
     const status=ref("all");
+    const allButton=ref({
+        title: 'Show All Tasks',
+        active: true
+    })
+    const remainingButton=ref({
+        title: 'Show Remaining Tasks',
+        active: false
+    })
+    const finishedButton=ref({
+        title: 'Show Finished Tasks',
+        active: false
+    })
     const isAllSelected=computed(()=>{
         if(tasks.value.filter((task)=>{
             return task.isCompleted === false;
         }).length !== 0)return false;
         else return true;
+    });
+    const isAnySelected=computed(()=>{
+        if(tasks.value.filter((task)=>{
+            return task.isCompleted === true;
+        }).length > 0)return true;
+        else return false;  
     });
     
     function newTask(text)
@@ -80,14 +97,32 @@
 
     function showRemaining(){
         status.value="remaining"
+        remainingButton.value.active=true;
+        allButton.value.active=false;
+        finishedButton.value.active=false;
     }
 
     function showAll(){
         status.value="all"
+        remainingButton.value.active=false;
+        allButton.value.active=true;
+        finishedButton.value.active=false;
     }
 
     function showFinished(){
         status.value="finished"
+        remainingButton.value.active=false;
+        allButton.value.active=false;
+        finishedButton.value.active=true;
+    }
+
+    function clearSelected()
+    {
+        for(let i=0;i<tasks.value.length;i++)
+        {
+            if(tasks.value[i].isCompleted)
+                tasks.value[i].value=null;
+        }
     }
 
 </script>
@@ -115,13 +150,24 @@
                 :is-selected="isAllSelected" 
                 @select="toggleCompleted" 
             />
-            
-            <showAllTasks :status="status" @show-all-tasks="showAll"/>
-            <showRemainingTasks :status="status"  @show-remaining-tasks="showRemaining" />
-            <showFinishedTasks  :status="status" @show-Finished-tasks="showFinished" />
+            <ButtonComponent 
+                :object="allButton" 
+                @show-all-tasks="showAll"
+            />
+            <ButtonComponent 
+                :object="remainingButton" 
+                @show-remaining-tasks="showRemaining"
+            />
+            <ButtonComponent 
+                :object="finishedButton" 
+                @show-Finished-tasks="showFinished"
+            />
+            <ClearCompletedButton 
+                :is-any-selected="isAnySelected"
+                @clear-selected="clearSelected"
+            />
 
         </div>
-        
     </main>
     
 </template>
