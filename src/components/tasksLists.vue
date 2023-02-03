@@ -1,11 +1,15 @@
 <script setup>
     import { ref , computed } from "vue"
     
-    const prop = defineProps(['viewTask']);
+    const prop = defineProps(['viewTask','status']);
     const emit = defineEmits(['removeTask','singleClick','doubleClick','updateTask']);
     const inputText=ref("");
+    const vFocus = {mounted: (el) => el.focus()}
+    // const onInputClick = () =>{};
+    inputText.value=prop.viewTask.value;
     let noOfClicks=0;
     let timer=null;
+
     function eventHandler()
     {
         noOfClicks++;
@@ -24,10 +28,13 @@
         }
     }
 
-
     function checkFunction()
     {
-        return prop.viewTask.value!== null;
+        if(prop.viewTask.value === null)return false;
+
+        if(prop.status=== "all")return true;
+        if(prop.status=== "remaining")return !prop.viewTask.isCompleted;
+        if(prop.status=== "finished")return prop.viewTask.isCompleted;
     }
 
     function emitText(e)
@@ -37,16 +44,32 @@
         e.preventDefault();
     }
 
+    const onInputClick = () =>{}
+
 
 
 </script>
 
 <template>
-    <li v-show="checkFunction()" @click="eventHandler()" :style="{backgroundColor: viewTask.color}">
-        <input type="checkbox">
-        <input type="text" v-model="inputText" v-if="viewTask.isEdit" @keypress.enter="emitText" >
+    <li v-show="checkFunction()" 
+        @click="eventHandler()" 
+        :style="{backgroundColor: viewTask.color}"
+    >  
+        <input  type="text" 
+                v-focus
+                v-model="inputText" 
+                v-if="viewTask.isEdit" 
+                @keypress.enter="emitText" 
+                @focusout="emitText"
+                @click.stop="onInputClick()"
+        >
+                
+
         <span v-else>{{ viewTask.value }}</span>
-        <span class="close" @click="$emit('removeTask',e,viewTask.id)">x</span>
+        <span 
+            class="close" 
+            @click="$emit('removeTask',e,viewTask.id)"
+        >x</span>
     </li>
 </template>
 
@@ -88,4 +111,5 @@ input[type="checkbox"] {
 input[type="text"]{
     padding: 5px 5px;
 }
+
 </style>

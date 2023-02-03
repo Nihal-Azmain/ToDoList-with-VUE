@@ -1,12 +1,21 @@
 <script setup>
-    import {ref} from "vue"
+    import { ref , computed } from "vue"
     import inputTask from "./components/inputTask.vue"
     import TasksLists from "./components/tasksLists.vue";
+    import allCompleted from "./components/allCompleted.vue"
+    import showRemainingTasks from "./components/showRemainingTasks.vue";
+    import showFinishedTasks from "./components/showFinishedTasks.vue"
+    import showAllTasks from "./components/showAllTasks.vue"
 
     let id=0;
     const tasks=ref([]);
-
-    const active=ref("all");
+    const status=ref("all");
+    const isAllSelected=computed(()=>{
+        if(tasks.value.filter((task)=>{
+            return task.isCompleted === false;
+        }).length !== 0)return false;
+        else return true;
+    });
     
     function newTask(text)
     {
@@ -39,10 +48,46 @@
 
     function updateText(text,taskId)
     {
-        tasks.value[taskId].value=text;
-        tasks.value[taskId].color="#f6f6f6";
-        tasks.value[taskId].isCompleted=false;
+        if(text!=="")
+        {
+            tasks.value[taskId].value=text;
+            // tasks.value[taskId].color="#f6f6f6";
+            // tasks.value[taskId].isCompleted=false;
+        }
         tasks.value[taskId].isEdit=false;
+    }
+
+    function toggleCompleted()
+    {
+        if(!isAllSelected.value)
+        {
+            for(let i=0;i<tasks.value.length;i++)
+            {
+                tasks.value[i].isCompleted=true;
+                tasks.value[i].color="cyan"
+            }
+        }
+        else 
+        {
+            for(let i=0;i<tasks.value.length;i++)
+            {
+                tasks.value[i].isCompleted=false;
+                tasks.value[i].color="#f6f6f6"
+            }
+        }         
+    }
+
+
+    function showRemaining(){
+        status.value="remaining"
+    }
+
+    function showAll(){
+        status.value="all"
+    }
+
+    function showFinished(){
+        status.value="finished"
     }
 
 </script>
@@ -57,13 +102,26 @@
             <TasksLists v-for="task in tasks" 
                         :key="task.id" 
                         :viewTask="task"
+                        :status="status"
                         @remove-task="removeTask"
                         @single-click="checkCompleted"
                         @double-click="switchTemplate"
-                        @update-text="updateText"
+                        @update-task="updateText"
             />
         </ul>
 
+        <div>
+            <allCompleted 
+                :is-selected="isAllSelected" 
+                @select="toggleCompleted" 
+            />
+            
+            <showAllTasks :status="status" @show-all-tasks="showAll"/>
+            <showRemainingTasks :status="status"  @show-remaining-tasks="showRemaining" />
+            <showFinishedTasks  :status="status" @show-Finished-tasks="showFinished" />
+
+        </div>
+        
     </main>
     
 </template>
@@ -84,4 +142,3 @@ ul {
 }
 
 </style>
-

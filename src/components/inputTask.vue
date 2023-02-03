@@ -11,8 +11,12 @@
 </script>
 
 <template>
-    <form id="inputForm">
-            <input type="text" v-model="inputText" @keypress.enter="emitText">
+    <form>
+            <input 
+                type="text" v-model="inputText" 
+                @keypress.enter="emitText" 
+                autofocus
+            >
             <button @click="emitText">ADD</button>
     </form>
 </template>
@@ -23,6 +27,14 @@ form{
     padding-bottom: 20px;
 }
 input{
+    width: 600px;
+    height: 25px;
     padding: 5px 5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+button{
+    height: 38px;
 }
 </style>
